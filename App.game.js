@@ -19,7 +19,6 @@ import { Audio } from 'expo-av';
 const { width, height } = Dimensions.get('window');
 
 const App = () => {
-
   // Game states
   const [gameState, setGameState] = useState('splash'); // splash, instructions, setup, game, gameover
   const [playerName, setPlayerName] = useState('');
@@ -48,7 +47,6 @@ const App = () => {
   
   // Timer ref
   const timerRef = useRef(null);
-  console.log('App is rendering, gameState:', gameState);
 
   // Load initial data
   useEffect(() => {
@@ -124,10 +122,7 @@ const App = () => {
       if (savedScores) setHighScores(JSON.parse(savedScores));
       
       const savedDarkMode = await AsyncStorage.getItem('darkMode');
-      if (savedDarkMode !== null) {
-        setIsDarkMode(JSON.parse(savedDarkMode));
-      }
-      // If no saved preference, isDarkMode remains true (default)
+      if (savedDarkMode) setIsDarkMode(JSON.parse(savedDarkMode));
       
       const savedSound = await AsyncStorage.getItem('soundOn');
       if (savedSound !== null) setIsSoundOn(JSON.parse(savedSound));
@@ -139,8 +134,12 @@ const App = () => {
           duration: 1000,
           useNativeDriver: true,
         }).start(() => {
-          fadeAnim.setValue(1); // Reset opacity immediately
           setGameState('instructions');
+          Animated.timing(fadeAnim, {
+            toValue: 1,
+            duration: 500,
+            useNativeDriver: true,
+          }).start();
         });
       }, 2000);
     } catch (error) {
@@ -336,60 +335,30 @@ const App = () => {
     completed: '#66BB6A',
   };
 
-  const renderSplash = () => {
-    console.log('renderSplash called, theme.bg:', theme.bg);
-    return (
-      <Animated.View style={[styles.container, { backgroundColor: theme.bg, opacity: fadeAnim }]}>
-        <Text style={[styles.title, { color: theme.text, fontSize: 48 }]}>UNCHUNKED</Text>
-        <Text style={[styles.subtitle, { color: theme.text }]}>Piece Together the Words</Text>
-      </Animated.View>
-    );
-  };
+  const renderSplash = () => (
+    <Animated.View style={[styles.container, { backgroundColor: theme.bg, opacity: fadeAnim }]}>
+      <Text style={[styles.title, { color: theme.text, fontSize: 48 }]}>UNCHUNKED</Text>
+      <Text style={[styles.subtitle, { color: theme.text }]}>Piece Together the Words</Text>
+    </Animated.View>
+  );
 
-  const renderInstructions = () => {
-    console.log('renderInstructions called, theme.bg:', theme.bg, 'fadeAnim:', fadeAnim);
-    return (
-      <Animated.View style={[styles.container, { backgroundColor: theme.bg }]}>
-        <View style={[styles.instructionsCard, { backgroundColor: theme.card }]}>
-          <Text style={[styles.title, { color: theme.text, fontSize: 36, marginBottom: 30 }]}>Welcome to Unchunked!</Text>
-          <Text style={[styles.instructions, { color: theme.text }]}>
-            We've taken 9-letter words and broken them into 3-letter chunks—now it's your job to put them back together! 
-            Tap the chunks in the right order to rebuild the words. Need a boost? You've got 4 hints to help you out.
-          </Text>
-          
-          <View style={styles.instructionToggles}>
-            <View style={styles.toggleRow}>
-              <Text style={[styles.toggleLabel, { color: theme.text }]}>Dark Mode</Text>
-              <Switch
-                value={isDarkMode}
-                onValueChange={(value) => {
-                  setIsDarkMode(value);
-                  saveSettings();
-                }}
-              />
-            </View>
-            <View style={styles.toggleRow}>
-              <Text style={[styles.toggleLabel, { color: theme.text }]}>Sound Effects</Text>
-              <Switch
-                value={isSoundOn}
-                onValueChange={(value) => {
-                  setIsSoundOn(value);
-                  saveSettings();
-                }}
-              />
-            </View>
-          </View>
-          
-          <TouchableOpacity 
-            style={[styles.button, { backgroundColor: theme.button, paddingHorizontal: 60 }]}
-            onPress={() => setGameState('setup')}
-          >
-            <Text style={[styles.buttonText, { textTransform: 'uppercase', letterSpacing: 1 }]}>Let's Play!</Text>
-          </TouchableOpacity>
-        </View>
-      </Animated.View>
-    );
-  };
+  const renderInstructions = () => (
+    <Animated.View style={[styles.container, { backgroundColor: theme.bg, opacity: fadeAnim }]}>
+      <View style={[styles.instructionsCard, { backgroundColor: theme.card }]}>
+        <Text style={[styles.title, { color: theme.text, fontSize: 36, marginBottom: 30 }]}>Welcome to Unchunked!</Text>
+        <Text style={[styles.instructions, { color: theme.text }]}>
+          We've taken 9-letter words and broken them into 3-letter chunks—now it's your job to put them back together! 
+          Tap the chunks in the right order to rebuild the words. Need a boost? You've got 4 hints to help you out.
+        </Text>
+        <TouchableOpacity 
+          style={[styles.button, { backgroundColor: theme.button, paddingHorizontal: 60 }]}
+          onPress={() => setGameState('setup')}
+        >
+          <Text style={[styles.buttonText, { textTransform: 'uppercase', letterSpacing: 1 }]}>Let's Play!</Text>
+        </TouchableOpacity>
+      </View>
+    </Animated.View>
+  );
 
   const renderSetup = () => (
     <View style={[styles.container, { backgroundColor: theme.bg }]}>
@@ -455,29 +424,27 @@ const App = () => {
     return (
       <View style={[styles.gameContainer, { backgroundColor: theme.bg }]}>
         <View style={styles.gameHeader}>
-          <TouchableOpacity
-            style={[styles.modeButton, { backgroundColor: theme.card }]}
-            onPress={() => {
-              setIsDarkMode(!isDarkMode);
-              saveSettings();
-            }}
-          >
-            <Text style={[styles.modeButtonText, { color: theme.text }]}>
-              {isDarkMode ? 'Light Mode' : 'Dark Mode'}
+          <Text style={[styles.headerText, { color: theme.text }]}>UNCHUNKED</Text>
+          <View style={styles.headerControls}>
+            <Switch
+              value={isDarkMode}
+              onValueChange={(value) => {
+                setIsDarkMode(value);
+                saveSettings();
+              }}
+            />
+            <Text style={[styles.smallText, { color: theme.text, marginLeft: 10 }]}>
+              Sound {isSoundOn ? 'ON' : 'OFF'}
             </Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity
-            style={[styles.soundButton, { backgroundColor: theme.card }]}
-            onPress={() => {
-              setIsSoundOn(!isSoundOn);
-              saveSettings();
-            }}
-          >
-            <Text style={[styles.soundButtonText, { color: theme.text }]}>
-              Sound: {isSoundOn ? 'ON' : 'OFF'}
-            </Text>
-          </TouchableOpacity>
+            <Switch
+              value={isSoundOn}
+              onValueChange={(value) => {
+                setIsSoundOn(value);
+                saveSettings();
+              }}
+              style={{ marginLeft: 10 }}
+            />
+          </View>
         </View>
         
         <View style={styles.gameInfo}>
@@ -629,10 +596,6 @@ const App = () => {
     </Modal>
   );
 
-  console.log('App is rendering, gameState:', gameState);
-  console.log('Rendering splash?', gameState === 'splash');
-  console.log('Rendering instructions?', gameState === 'instructions');
-  
   return (
     <>
       {gameState === 'splash' && renderSplash()}
@@ -662,35 +625,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    gap: 10,
-  },
-  modeButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  modeButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  soundButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  soundButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
   },
   headerText: {
     fontSize: 24,
@@ -733,23 +667,9 @@ const styles = StyleSheet.create({
   instructions: {
     fontSize: 20,
     lineHeight: 32,
-    marginBottom: 30,
+    marginBottom: 40,
     textAlign: 'center',
     fontWeight: '300',
-  },
-  instructionToggles: {
-    marginBottom: 30,
-    gap: 15,
-  },
-  toggleRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 15,
-  },
-  toggleLabel: {
-    fontSize: 16,
-    fontWeight: '500',
   },
   setupTitle: {
     fontSize: 28,
@@ -823,7 +743,6 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 18,
     fontWeight: '600',
-    textAlign: 'center',
   },
   gameInfo: {
     paddingHorizontal: 20,
