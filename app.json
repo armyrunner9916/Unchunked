@@ -1,29 +1,38 @@
 {
   "expo": {
-    "name": "UnchunkedGame",
-    "slug": "UnchunkedGame",
-    "version": "1.0.0",
+    "name": "Unchunked",
+    "slug": "unchunked-game",
+    "version": "1.0.1",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
-    "newArchEnabled": true,
+    "icon": "./assets/icon-v2.png",
+    "userInterfaceStyle": "automatic",
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#000000"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.steveomatic.unchunked",
+      "buildNumber": "2",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "foregroundImage": "./assets/icon-v2.png",
+        "backgroundColor": "#000000"
       },
-      "edgeToEdgeEnabled": true
+      "package": "com.steveomatic.unchunked"
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/icon-v2.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "1c70d62c-93f5-404b-aedc-11af5f25e9b4"
+      }
     }
   }
 }
